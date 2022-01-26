@@ -3,11 +3,9 @@
     import SecretStuff from "./artifacts/contracts/SecretStuff.sol/SecretStuff.json";
     import {onDestroy, onMount} from "svelte";
 
-    const rootsJson = [["0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", ["0x00314e565e0574cb412563df634608d76f5c59d9f817e85966100ec1d48005c0"]], ["0xc901218ab8dfa7ad52a73abba70da58da891b200", ["0x00314e565e0574cb412563df634608d76f5c59d9f817e85966100ec1d48005c0"]]];
-
-    const presaleList = [];
-    const presaleMap = new Map(presaleList);
-
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    let isPresaleMintActive = false;
+    let isPublicMintActive = false;
     let currentAccount;
     let currentAddressRole;
 
@@ -18,13 +16,20 @@
             }, 1000)
 
         } else {
-            console.log(window.ethereum.networkVersion)
-            try{
+
+            try {
                 isPresaleMintActive = await isPresaleActive();
+                isPublicMintActive = await isPublicActive();
                 console.log(isPresaleMintActive)
             } catch (err) {
                 console.log(err);
             }
+            setTimeout(() => {
+                if (window.ethereum.networkVersion !== '1') {
+                    alert('Change network to mainnet')
+                }
+            }, 1000)
+
             window.ethereum.on("chainChanged", handleChainChanged)
             window.ethereum.on("accountsChanged", handleAccountsChanged)
             window.ethereum.on("disconnect", handleDisconnect)
@@ -58,52 +63,69 @@
         window.location.reload();
     }
 
-    const map = new Map(rootsJson);
-    // map.set("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266", ["0x343750465941b29921f50a28e0e43050e5e1c2611a3ea8d7fe1001090d5e1436"]);
-    // map.set("0x70997970c51812dc3a010c7d01b50e0d17dc79c8", ["0x8a3552d60a98e0ade765adddad0a2e420ca9b1eef5f326ba7ab860bb4ea72c94","0xe9707d0e6171f728f7473c24cc0432a9b07eaaf1efed6a137a4a8c12c79552d9"]);
-    console.log("=====")
-    console.log(map);
-
-    const sampleTokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    let isPresaleMintActive = false;
-
     async function requestAccount() {
         await window.ethereum.request({method: "eth_requestAccounts"});
     }
 
-
-    async function genesisFreeClaim() {
+    const genesisFreeClaim = async () => {
         if (typeof window.ethereum !== "undefined") {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-            const contract = new ethers.Contract(sampleTokenAddress, SecretStuff.abi, signer);
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
             const mmAddress = await signer.getAddress();
             const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), currentAddressRole);
             if (proofForAddress) {
-                console.log(proofForAddress);
                 try {
                     const transaction = await contract.genesisMint(proofForAddress)
                     await transaction.wait();
                 } catch (err) {
-                    const errMsg = err.data.message;
-                    if (errMsg.includes("Max mints exceeded")) {
+                    const errMsg = err.data?.message;
+                    if (errMsg?.includes("Max mints exceeded")) {
                         alert("You have already claimed your token")
                     }
-                    console.log(err.data.message);
+                    console.log(err?.data?.message);
                 }
-
             } else {
                 alert("This wallet address is not eligible for presale")
             }
         }
     }
 
-    async function earlyBirdMint() {
+    const genesisWhitelistMint = async () => {
 
         if (typeof window.ethereum !== "undefined") {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-            const contract = new ethers.Contract(sampleTokenAddress, SecretStuff.abi, signer);
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+            const mmAddress = await signer.getAddress();
+            const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), 'wl');
+            if (proofForAddress) {
+                try {
+                    const options = {
+                        value: ethers.utils.parseEther("0.11")
+                    }
+                    const transaction = await contract.whitelistMint([...proofForAddress], options)
+                    await transaction.wait();
+                } catch (err) {
+                    console.log(err)
+                    const errMsg = err.data?.message;
+                    if (errMsg.includes("Max mints exceeded")) {
+                        alert("You have already minted your token")
+                    }
+                    console.log(err?.data?.message);
+                }
+            } else {
+                alert("This wallet address is not eligible for presale")
+            }
+        }
+    };
+
+    const earlyBirdMint = async () => {
+
+        if (typeof window.ethereum !== "undefined") {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
             const mmAddress = await signer.getAddress();
             const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), currentAddressRole);
             if (proofForAddress) {
@@ -120,11 +142,11 @@
                     // console.log("transaction: ", transaction);
                 } catch (err) {
                     console.log(err)
-                    const errMsg = err.data.message;
-                    if (errMsg.includes("Max mints exceeded")) {
+                    const errMsg = err.data?.message;
+                    if (errMsg?.includes("Max mints exceeded")) {
                         alert("You have already minted your token")
                     }
-                    console.log(err.data.message);
+                    console.log(err?.data?.message);
                 }
             } else {
                 alert("This wallet address is not eligible for presale")
@@ -132,12 +154,12 @@
         }
     }
 
-    async function whitelistMint() {
+    const whitelistMint = async () => {
 
         if (typeof window.ethereum !== "undefined") {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-            const contract = new ethers.Contract(sampleTokenAddress, SecretStuff.abi, signer);
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
             const mmAddress = await signer.getAddress();
             const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), currentAddressRole);
             if (proofForAddress) {
@@ -152,41 +174,86 @@
                     await transaction.wait();
                 } catch (err) {
                     console.log(err)
-                    const errMsg = err.data.message;
-                    if (errMsg.includes("Max mints exceeded")) {
+                    const errMsg = err.data?.message;
+                    if (errMsg?.includes("Max mints exceeded")) {
                         alert("You have already minted your token")
                     }
-                    console.log(err.data.message);
+                    console.log(err?.data?.message);
                 }
             } else {
                 alert("This wallet address is not eligible for presale")
             }
         }
     }
+    const publicMint = async () => {
+        if (typeof window.ethereum !== "undefined") {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+            try {
+                const options = {
+                    value: ethers.utils.parseEther("0.11")
+                }
+                const transaction = await contract.publicMint(options)
+                await transaction.wait();
+            } catch (err) {
+                console.log(err)
+                const errMsg = err.data?.message;
+                if (errMsg?.includes("Max mints exceeded")) {
+                    alert("You have already minted your token")
+                }
+                console.log(err?.data?.message);
+            }
+        } else {
+            alert("This wallet address is not eligible for presale")
+        }
+
+    }
 
 
     async function togglePresaleMint() {
         if (typeof window.ethereum !== "undefined") {
-            // await requestAccount();
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
-            const contract = new ethers.Contract(sampleTokenAddress, SecretStuff.abi, signer);
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
             const transaction = await contract.togglePresaleMint();
             await transaction.wait();
-            console.log(`Toggled Presale Mint`);
-            console.log("transaction: ", transaction);
+
+        }
+    }
+
+    async function togglePublicMint() {
+        if (typeof window.ethereum !== "undefined") {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            const signer = provider.getSigner();
+            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+            const transaction = await contract.togglePublicMint();
+            await transaction.wait();
         }
     }
 
     async function isPresaleActive() {
         if (typeof window.ethereum !== "undefined") {
-            try{
+            try {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
-                const contract = new ethers.Contract(sampleTokenAddress, SecretStuff.abi, signer);
+                const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
                 return await contract.isPresaleActive();
-            } catch (err){
-                console.log(err);
+            } catch (err) {
+                return false;
+            }
+
+        }
+    }
+
+    async function isPublicActive() {
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+                return await contract.isPublicActive();
+            } catch (err) {
                 return false;
             }
 
@@ -194,29 +261,20 @@
     }
 
     const connectWallet = async () => {
-        const a = await window.ethereum.request({method: "eth_requestAccounts"})
-            .then(async accounts => {
-                console.log(accounts[0]);
-                currentAccount = accounts[0];
-                const role = await getRole(currentAccount);
-                currentAddressRole = role;
-            })
-            .catch(e => {
-                console.error(e.message)
-                return
-            })
+        try {
+            const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
+            currentAccount = accounts[0];
+            currentAddressRole = await getRole(currentAccount);
+        } catch (err) {
+            console.log(err);
+        }
 
-        // const provider = new ethers.providers.Web3Provider(window.ethereum);
-        // const signer = provider.getSigner();
-        // metamaskWallet = await signer.getAddress();
-        // console.log(metamaskWallet);
     }
 
     const getRole = async address => {
         try {
             const response = await fetch(`http://localhost:8080/api/role/${address}`)
             const roleJson = await response.json();
-            console.log(roleJson)
             return roleJson.role;
         } catch (err) {
             console.log(err);
@@ -239,10 +297,6 @@
     const disconnectWallet = () => {
         currentAccount = null;
     };
-    const genesisWhitelistMint = () => {
-        console.log("not implemented")
-    };
-
 
 
 </script>
@@ -287,6 +341,7 @@
                     <div style="text-align: center;"><strong>Welcome to The World of Simples!</strong></div>
                     <br/>
                     <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>
+                    <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>
                     <div>
                         {#if !currentAccount}
                             <button on:click={connectWallet}>Connect Wallet</button>
@@ -295,7 +350,7 @@
                                 <span>{currentAccount}</span>
                                 <button on:click={disconnectWallet}>Disconnect</button>
                             </div>
-                            {#if isPresaleMintActive}
+                            {#if isPresaleMintActive && !isPublicMintActive}
                                 {#if currentAddressRole === "gen"}
                                     <div>
                                         <span>Wallet has Genesis role assigned: 1 free clam + 1 whitelist mint allowed</span>
@@ -311,11 +366,18 @@
                                     </div>
                                     <div>
                                         <button on:click={earlyBirdMint}>Early Bird Mint</button>
+                                        <button on:click={genesisFreeClaim}>Genesis claim</button>
+                                        <button on:click={genesisWhitelistMint}>Whitelist Mint</button>
                                     </div>
 
                                 {:else if currentAddressRole === "wl"}
                                     <div>
                                         <span>Wallet has Whitelist role assigned: 1 mint allowed</span>
+                                    </div>
+                                    <div>
+                                        <button on:click={whitelistMint}>Whitelist Mint</button>
+                                        <button on:click={genesisFreeClaim}>Genesis claim</button>
+                                        <button on:click={genesisWhitelistMint}>Whitelist Mint</button>
                                     </div>
 
                                 {:else}
@@ -324,11 +386,20 @@
                                     </div>
 
                                 {/if}
+                            {:else if isPresaleMintActive && isPublicMintActive}
+                                <div>
+                                    <span>Public Mint</span>
+                                </div>
+                                <div>
+                                    <button on:click={publicMint}>Mint</button>
+                                </div>
                             {/if}
                         {/if}
                     </div>
-                    <button on:click={togglePresaleMint}>Toggle Genesis Mint</button>
-                    <button on:click={isPresaleActive}>Get Genesis Mint status</button>
+                    <button on:click={togglePresaleMint}>Toggle Presale Mint</button>
+                    <button on:click={togglePublicMint}>Toggle Public Mint</button>
+                    <button on:click={isPresaleActive}>Get Presale Mint status</button>
+                    <button on:click={isPublicActive}>Get Public Mint status</button>
                     <div style="text-align: center;"><strong>Project starts soon! Stay tuned!</strong></div>
                     <br><br>
                     <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"><br> <br> <br> The Simples

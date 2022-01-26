@@ -27,7 +27,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
 
     bytes32 public genesisRoot = 0x33887c7962aa450a853b0f9b53dce744f6e85ab34d8ea33328ade270014b3553;
     bytes32 public earlyBirdRoot = 0x8a9eb10e5902f3de696d482e8d43be02d4c2925d8a13b1d91564556786cd53c8;
-    bytes32 public whitelistRoot = 0x1f62655901b37227b56bc225f83198ff688bfdaf330551d424ee719d7cc877f1;
+    bytes32 public whitelistRoot = 0xbb21e0d08852df8f7ae4685b0e005935d8a63cecf1751bc03ab210d7b0daea4e;
 
     string private _customBaseURI;
 
@@ -133,7 +133,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     }
 
     function togglePublicMint() external onlyOwner {
-        isPublicActive = !isPresaleActive;
+        isPublicActive = !isPublicActive;
     }
 
     function setMaxMintsPerWallet(uint256 amount) external onlyOwner {
