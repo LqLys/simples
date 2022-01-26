@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rollup -c",
+    "build": "npx hardhat compile && rollup -c",
     "dev": "rollup -c -w",
-    "start": "npx hardhat compile && sirv public --no-clear"
+    "start": "sirv public --no-clear"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
