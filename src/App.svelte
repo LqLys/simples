@@ -3,7 +3,8 @@
     import SecretStuff from "./artifacts/contracts/SecretStuff.sol/SecretStuff.json";
     import {onDestroy, onMount} from "svelte";
 
-    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    // const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const contractAddress = "0xd3d927F2E87EdB36B8490B1D3597641D839eAeCC";
     let isPresaleMintActive = false;
     let isPublicMintActive = false;
     let currentAccount;
