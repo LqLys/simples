@@ -366,8 +366,6 @@
                                     </div>
                                     <div>
                                         <button on:click={earlyBirdMint}>Early Bird Mint</button>
-                                        <button on:click={genesisFreeClaim}>Genesis claim</button>
-                                        <button on:click={genesisWhitelistMint}>Whitelist Mint</button>
                                     </div>
 
                                 {:else if currentAddressRole === "wl"}
@@ -376,8 +374,6 @@
                                     </div>
                                     <div>
                                         <button on:click={whitelistMint}>Whitelist Mint</button>
-                                        <button on:click={genesisFreeClaim}>Genesis claim</button>
-                                        <button on:click={genesisWhitelistMint}>Whitelist Mint</button>
                                     </div>
 
                                 {:else}
