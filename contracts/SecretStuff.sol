@@ -27,7 +27,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
 
     bytes32 public genesisRoot = 0x96c4abbbb9dd027813f2b8c2c4917b15bb46b3c8d595841148f2de33d0c4d6ae;
     bytes32 public earlyBirdRoot = 0x8a9eb10e5902f3de696d482e8d43be02d4c2925d8a13b1d91564556786cd53c8;
-    bytes32 public whitelistRoot = 0x87691d761886502c402d5ab1a6ced3267079a45aee09224839c9aa1cbe646382;
+    bytes32 public whitelistRoot = 0xf657dadef6f1ad6817e8b9014f775019102bfccb277ffe67779f57783c0305dd;
 
     string private _customBaseURI;
 
