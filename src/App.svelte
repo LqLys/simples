@@ -273,7 +273,7 @@
 
     const getRole = async address => {
         try {
-            const response = await fetch(`http://localhost:8080/api/role/${address}`)
+            const response = await fetch(`https://simples-api.herokuapp.com/api/role/${address}`)
             const roleJson = await response.json();
             return roleJson.role;
         } catch (err) {
@@ -284,7 +284,7 @@
 
     const getProofForRoleAndAddress = async (address, role) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/proof?wallet=${address}&role=${role}`)
+            const response = await fetch(`https://simples-api.herokuapp.com/api/proof?wallet=${address}&role=${role}`)
             const proofJson = await response.json();
             console.log("proof: ", proofJson)
             return proofJson.proof;
