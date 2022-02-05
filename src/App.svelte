@@ -288,10 +288,10 @@
                         {#if !currentAccount}
                             <button class="button-5" on:click={connectWallet}>Connect Wallet</button>
                         {:else}
-<!--                            <div>-->
-<!--                                <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>-->
-<!--                                <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>-->
-<!--                            </div>-->
+                            <!--                            <div>-->
+                            <!--                                <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>-->
+                            <!--                                <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>-->
+                            <!--                            </div>-->
                             <div>
                                 <span class="wallet-container">{currentAccount}</span>
                                 <button class="button-5" on:click={disconnectWallet}>Disconnect</button>
@@ -347,13 +347,25 @@
                                         <option value="{2}">2</option>
                                     </select>
                                 </div>
+                            {:else}
+                                <div class="amount-info-container">
+                                    {#if currentAddressRole === "gen"}
+                                        <span>Free Claim and 2 presale mints allowed.</span>
+                                    {:else if currentAddressRole === "eb"}
+                                        <span>Free Claim and 2 presale mints allowed.</span>
+                                    {:else if currentAddressRole === "wl"}
+                                        <span>1 presale mint allowed.</span>
+                                    {:else}
+                                        <span>This wallet is not eligible for presale.</span>
+                                    {/if}
+                                </div>
                             {/if}
                         {/if}
                     </div>
-<!--                    <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>-->
-<!--                    <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>-->
-<!--                    <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>-->
-<!--                    <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>-->
+                    <!--                    <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>-->
+                    <!--                    <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>-->
+                    <!--                    <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>-->
+                    <!--                    <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>-->
                     <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"></div>
                 </td>
             </tr>
@@ -385,7 +397,7 @@
         }
     }
 
-    .amount-selector{
+    .amount-selector {
         width: 50px;
         height: 35px;
         font-size: larger;
