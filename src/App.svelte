@@ -284,97 +284,65 @@
             <tbody>
             <tr>
                 <td style="width: 100%;">
-                    <h2 style="text-align: center;"><strong>
-                        <a href="https://twitter.com/thesimplesart" target="_blank" rel="noopener">Twitter</a>&nbsp;
-                        &nbsp;
-                        <a href="https://www.instagram.com/thesimples.art/" target="_blank" rel="noopener">Instagram</a>&nbsp;
-                        &nbsp;
-                        <a href="https://discord.gg/RCn2TdchEP" target="_blank" rel="noopener">Discord</a>&nbsp; &nbsp;
-                        <a href="https://opensea.io/collection/the-simples-genesis" target="_blank" rel="noopener">The
-                            Simples - Genesis</a>
-                    </strong></h2>
-                    <br><br>
-                    <div style="text-align: center;"><strong>What are The Simples? What they"re all about? Why are they?
-                        <br/>What is there for me?</strong></div>
-                    <br/>
-                    <div>Simples are like children. Running around in all directions. Some of them are planning to go to
-                        a gallery and some want to be avatars all over the internet. Big pack of Simples wants to get to
-                        the real world. Some of them think to be very serious but really The Simples just want to have
-                        fun and discover new interesting stuff to do. As they don"t know what they"re doing most of the
-                        time, they can cause some trouble along the way. If They do, Simples always say "sorry" and then
-                        get better at it! And then go back to being silly.
-                    </div>
-                    <div>&nbsp;</div>
-                    <div style="text-align: center;"><strong>All Simples are unique, just like all of us.</strong></div>
-                    <div style="text-align: center;"><strong>Simple - Freedom</strong></div>
-                    <br/>
-                    <div><strong>What are Simples all about?</strong> - mixing virtual world with the real one.
-                        Blockchain and token NFT technology is the beautifully digital world. Simples see the future and
-                        freedom in it. They want to be creative and helpful. We can feel their enthusiasm for collecting
-                        meaningful experiences in digital as well as the real world.
-                    </div>
-                    <div style="text-align: center;"><strong>Welcome to The World of Simples!</strong></div>
-                    <br/>
-
                     <div>
                         {#if !currentAccount}
-                            <button on:click={connectWallet}>Connect Wallet</button>
+                            <button class="button-5" on:click={connectWallet}>Connect Wallet</button>
                         {:else}
+<!--                            <div>-->
+<!--                                <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>-->
+<!--                                <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>-->
+<!--                            </div>-->
                             <div>
-                                <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>
-                                <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>
-                            </div>
-                            <div>
-                                <span>{currentAccount}</span>
-                                <button on:click={disconnectWallet}>Disconnect</button>
+                                <span class="wallet-container">{currentAccount}</span>
+                                <button class="button-5" on:click={disconnectWallet}>Disconnect</button>
                             </div>
                             {#if isPresaleMintActive && !isPublicMintActive}
                                 {#if currentAddressRole === "gen"}
-                                    <div>
-                                        <span>Wallet has Genesis role assigned: 1 free clam + 2 whitelist mints allowed in total</span>
+                                    <div class="amount-info-container">
+                                        <span>Free Claim and 2 presale mints allowed.</span>
                                     </div>
                                     <div>
-                                        <button on:click={genesisFreeClaim}>Genesis claim</button>
-                                        <button on:click={ogsMint}>Mint</button>
-                                        <select bind:value={ogAmountSelected}>
+                                        <button class="button-5" on:click={genesisFreeClaim}>Free claim</button>
+                                        <button class="button-5" on:click={ogsMint}>Mint</button>
+                                        <select class="amount-selector" bind:value={ogAmountSelected}>
                                             <option value="{1}">1</option>
                                             <option value="{2}">2</option>
                                         </select>
                                     </div>
 
                                 {:else if currentAddressRole === "eb"}
-                                    <div>
-                                        <span>Selected wallet is allowed to 2 mints in total</span>
+                                    <div class="amount-info-container">
+                                        <span>2 presale mints allowed.</span>
                                     </div>
                                     <div>
-                                        <button on:click={ogsMint}>Mint</button>
-                                        <select bind:value={ogAmountSelected}>
+                                        <button class="button-5" on:click={ogsMint}>Mint</button>
+                                        <select class="amount-selector" bind:value={ogAmountSelected}>
                                             <option value="{1}">1</option>
                                             <option value="{2}">2</option>
                                         </select>
                                     </div>
 
                                 {:else if currentAddressRole === "wl"}
-                                    <div>
-                                        <span>Wallet has Whitelist role assigned: 1 mint allowed</span>
+                                    <div class="amount-info-container">
+                                        <span>1 presale mint allowed.</span>
                                     </div>
                                     <div>
-                                        <button on:click={whitelistMint}>Whitelist Mint</button>
+                                        <button class="button-5" on:click={whitelistMint}>Mint</button>
                                     </div>
 
                                 {:else}
-                                    <div>
+                                    <div class="amount-info-container">
                                         <span>This wallet is not eligible for presale</span>
                                     </div>
 
                                 {/if}
                             {:else if isPresaleMintActive && isPublicMintActive}
-                                <div>
-                                    <span>Public Mint</span>
+                                <div class="amount-info-container">
+                                    <span>2 mints allowed.</span>
                                 </div>
                                 <div>
-                                    <button on:click={publicMint}>Mint</button>
-                                    <select bind:value={publicAmountSelected}>
+                                    <button class="button-5" on:click={publicMint}>Mint</button>
+                                    <select class="amount-selector" bind:value={publicAmountSelected}>
                                         <option value="{1}">1</option>
                                         <option value="{2}">2</option>
                                     </select>
@@ -382,24 +350,21 @@
                             {/if}
                         {/if}
                     </div>
-                    <button on:click={togglePresaleMint}>Toggle Presale Mint</button>
-                    <button on:click={togglePublicMint}>Toggle Public Mint</button>
-                    <button on:click={isPresaleActive}>Get Presale Mint status</button>
-                    <button on:click={isPublicActive}>Get Public Mint status</button>
-                    <div style="text-align: center;"><strong>Project starts soon! Stay tuned!</strong></div>
-                    <br><br>
-                    <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"><br> <br> <br> The Simples
-                        2021
-                    </div>
+<!--                    <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>-->
+<!--                    <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>-->
+<!--                    <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>-->
+<!--                    <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>-->
+                    <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"></div>
                 </td>
             </tr>
             </tbody>
         </table>
-        <br><br><br><br>
     </div>
 </main>
 
 <style>
+    @import url('http://fonts.cdnfonts.com/css/roboto');
+
     main {
         text-align: center;
         padding: 1em;
@@ -418,5 +383,73 @@
         main {
             max-width: none;
         }
+    }
+
+    .amount-selector{
+        width: 50px;
+        height: 35px;
+        font-size: larger;
+        text-align: center;
+    }
+
+    .button-5 {
+        align-items: center;
+        background-clip: padding-box;
+        background-color: #F47C06;
+        border: 1px solid transparent;
+        border-radius: .25rem;
+        box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+        box-sizing: border-box;
+        color: #fff;
+        cursor: pointer;
+        display: inline-flex;
+        font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        justify-content: center;
+        line-height: 1.25;
+        margin: 0;
+        min-height: 3rem;
+        padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+        position: relative;
+        text-decoration: none;
+        transition: all 250ms;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        vertical-align: baseline;
+        width: auto;
+    }
+
+    .button-5:hover,
+    .button-5:focus {
+        background-color: #F47C06;
+        box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+    }
+
+    .button-5:hover {
+        transform: translateY(-1px);
+    }
+
+    .button-5:active {
+        background-color: #F47C06;
+        box-shadow: rgba(0, 0, 0, .06) 0 2px 4px;
+        transform: translateY(0);
+    }
+
+    .wallet-container {
+        font-family: sans-serif;
+        border: 3px solid #F47C06;
+        border-radius: 10px;
+        padding: 12px;
+        font-family: 'Roboto';
+        font-weight: 900
+    }
+
+    .amount-info-container {
+        font-family: 'Roboto';
+        margin-top: 8px;
+        margin-bottom: 8px;
+        font-weight: 900;
     }
 </style>
