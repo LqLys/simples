@@ -3,12 +3,17 @@
     import SecretStuff from "./artifacts/contracts/SecretStuff.sol/SecretStuff.json";
     import {onDestroy, onMount} from "svelte";
 
-    // const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    const contractAddress = "0xd3d927F2E87EdB36B8490B1D3597641D839eAeCC";
+    // const API_BASE = 'https://simples-api.herokuapp.com/api/';
+    const API_BASE = 'http://localhost:8080/api/';
+
+    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    // const contractAddress = "0xd3d927F2E87EdB36B8490B1D3597641D839eAeCC";
     let isPresaleMintActive = false;
     let isPublicMintActive = false;
     let currentAccount;
     let currentAddressRole;
+    let ogAmountSelected = 2;
+    let publicAmountSelected = 2;
 
     onMount(async () => {
         if (typeof window.ethereum === "undefined") {
@@ -17,10 +22,7 @@
             }, 1000)
 
         } else {
-
             try {
-                isPresaleMintActive = await isPresaleActive();
-                isPublicMintActive = await isPublicActive();
                 console.log(isPresaleMintActive)
             } catch (err) {
                 console.log(err);
@@ -77,7 +79,7 @@
             const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), currentAddressRole);
             if (proofForAddress) {
                 try {
-                    const transaction = await contract.genesisMint(proofForAddress)
+                    const transaction = await contract.genesisClaim(proofForAddress)
                     await transaction.wait();
                 } catch (err) {
                     const errMsg = err.data?.message;
@@ -92,20 +94,22 @@
         }
     }
 
-    const genesisWhitelistMint = async () => {
+    const ogsMint = async () => {
 
         if (typeof window.ethereum !== "undefined") {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
             const mmAddress = await signer.getAddress();
-            const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), 'wl');
+            const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), 'eb');
+
+            const value = ogAmountSelected === 2 ? "0.22" : "0.11";
             if (proofForAddress) {
                 try {
                     const options = {
-                        value: ethers.utils.parseEther("0.11")
+                        value: ethers.utils.parseEther(value)
                     }
-                    const transaction = await contract.whitelistMint([...proofForAddress], options)
+                    const transaction = await contract.ogsMint([...proofForAddress], ogAmountSelected, options)
                     await transaction.wait();
                 } catch (err) {
                     console.log(err)
@@ -120,40 +124,6 @@
             }
         }
     };
-
-    const earlyBirdMint = async () => {
-
-        if (typeof window.ethereum !== "undefined") {
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
-            const mmAddress = await signer.getAddress();
-            const proofForAddress = await getProofForRoleAndAddress(mmAddress.toLowerCase(), currentAddressRole);
-            if (proofForAddress) {
-                console.log(proofForAddress);
-                try {
-                    const options = {
-                        value: ethers.utils.parseEther("0.055")
-                    }
-                    console.log('proof', proofForAddress);
-
-                    const transaction = await contract.earlyBirdMint([...proofForAddress], options)
-                    await transaction.wait();
-                    // console.log(`${1} successfully minted`);
-                    // console.log("transaction: ", transaction);
-                } catch (err) {
-                    console.log(err)
-                    const errMsg = err.data?.message;
-                    if (errMsg?.includes("Max mints exceeded")) {
-                        alert("You have already minted your token")
-                    }
-                    console.log(err?.data?.message);
-                }
-            } else {
-                alert("This wallet address is not eligible for presale")
-            }
-        }
-    }
 
     const whitelistMint = async () => {
 
@@ -191,11 +161,13 @@
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
             const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+
+            let value = publicAmountSelected === 2 ? "0.22" : "0.11";
             try {
                 const options = {
-                    value: ethers.utils.parseEther("0.11")
+                    value: ethers.utils.parseEther(value)
                 }
-                const transaction = await contract.publicMint(options)
+                const transaction = await contract.publicMint(publicAmountSelected, options)
                 await transaction.wait();
             } catch (err) {
                 console.log(err)
@@ -266,6 +238,8 @@
             const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
             currentAccount = accounts[0];
             currentAddressRole = await getRole(currentAccount);
+            isPresaleMintActive = await isPresaleActive();
+            isPublicMintActive = await isPublicActive();
         } catch (err) {
             console.log(err);
         }
@@ -274,7 +248,7 @@
 
     const getRole = async address => {
         try {
-            const response = await fetch(`https://simples-api.herokuapp.com/api/role/${address}`)
+            const response = await fetch(API_BASE + `role/${address}`)
             const roleJson = await response.json();
             return roleJson.role;
         } catch (err) {
@@ -285,7 +259,7 @@
 
     const getProofForRoleAndAddress = async (address, role) => {
         try {
-            const response = await fetch(`https://simples-api.herokuapp.com/api/proof?wallet=${address}&role=${role}`)
+            const response = await fetch(API_BASE + `proof?wallet=${address}&role=${role}`)
             const proofJson = await response.json();
             console.log("proof: ", proofJson)
             return proofJson.proof;
@@ -341,12 +315,15 @@
                     </div>
                     <div style="text-align: center;"><strong>Welcome to The World of Simples!</strong></div>
                     <br/>
-                    <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>
-                    <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>
+
                     <div>
                         {#if !currentAccount}
                             <button on:click={connectWallet}>Connect Wallet</button>
                         {:else}
+                            <div>
+                                <div>{`Presale is ${isPresaleMintActive ? "active" : "inactive"}`}</div>
+                                <div>{`Public is ${isPublicMintActive ? "active" : "inactive"}`}</div>
+                            </div>
                             <div>
                                 <span>{currentAccount}</span>
                                 <button on:click={disconnectWallet}>Disconnect</button>
@@ -354,19 +331,27 @@
                             {#if isPresaleMintActive && !isPublicMintActive}
                                 {#if currentAddressRole === "gen"}
                                     <div>
-                                        <span>Wallet has Genesis role assigned: 1 free clam + 1 whitelist mint allowed</span>
+                                        <span>Wallet has Genesis role assigned: 1 free clam + 2 whitelist mints allowed in total</span>
                                     </div>
                                     <div>
                                         <button on:click={genesisFreeClaim}>Genesis claim</button>
-                                        <button on:click={genesisWhitelistMint}>Whitelist Mint</button>
+                                        <button on:click={ogsMint}>Mint</button>
+                                        <select bind:value={ogAmountSelected}>
+                                            <option value="{1}">1</option>
+                                            <option value="{2}">2</option>
+                                        </select>
                                     </div>
 
                                 {:else if currentAddressRole === "eb"}
                                     <div>
-                                        <span>Wallet has Early Bird role assigned: 1 mint at half cost allowed</span>
+                                        <span>Selected wallet is allowed to 2 mints in total</span>
                                     </div>
                                     <div>
-                                        <button on:click={earlyBirdMint}>Early Bird Mint</button>
+                                        <button on:click={ogsMint}>Mint</button>
+                                        <select bind:value={ogAmountSelected}>
+                                            <option value="{1}">1</option>
+                                            <option value="{2}">2</option>
+                                        </select>
                                     </div>
 
                                 {:else if currentAddressRole === "wl"}
@@ -389,6 +374,10 @@
                                 </div>
                                 <div>
                                     <button on:click={publicMint}>Mint</button>
+                                    <select bind:value={publicAmountSelected}>
+                                        <option value="{1}">1</option>
+                                        <option value="{2}">2</option>
+                                    </select>
                                 </div>
                             {/if}
                         {/if}

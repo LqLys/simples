@@ -13,21 +13,31 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
 
     Counters.Counter private _tokenIdsCounter;
     uint public constant MAX_SUPPLY = 1111;
+    uint public constant MAX_EXTERNAL_MINTS = 1056;
+    uint public constant MAX_TREASURY_MINTS = 55;
+
     bool public isPresaleActive = false;
     bool public isPublicActive = false;
 
-    uint public maxMintPerWallet = 1;
+    uint public maxGenesisClaims = 1;
+    uint public maxOgsWlMints = 2;
+    uint public maxWlMints = 1;
+    uint public maxPublicMints = 2;
 
-    uint public earlyBirdPrice = 0.055 ether;
-    uint public regularPrice = 0.11 ether;
 
-    mapping(address => uint) genesisMintsCount;
-    mapping(address => uint) earlyBirdMintsCount;
+    uint public price = 0.11 ether;
+
+    mapping(address => uint) genesisClaims;
+    mapping(address => uint) ogMints;
     mapping(address => uint) whitelistMintsCount;
+    mapping(address => uint) publicMintCount;
+    uint public treasuryMintCounter = 0;
 
     bytes32 public genesisRoot = 0x96c4abbbb9dd027813f2b8c2c4917b15bb46b3c8d595841148f2de33d0c4d6ae;
-    bytes32 public earlyBirdRoot = 0x8a9eb10e5902f3de696d482e8d43be02d4c2925d8a13b1d91564556786cd53c8;
-    bytes32 public whitelistRoot = 0xf657dadef6f1ad6817e8b9014f775019102bfccb277ffe67779f57783c0305dd;
+    bytes32 public ogsRoot = 0x630d56621cf1a7e28c5373e27f73148778b52a3050a8196b0f14761c44220ece;
+    bytes32 public whitelistRoot = 0x1f62655901b37227b56bc225f83198ff688bfdaf330551d424ee719d7cc877f1;
+
+    address public treasuryAddress;
 
     string private _customBaseURI;
 
@@ -35,50 +45,69 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         setBaseTokenURI(initialBaseURI);
     }
 
-    function genesisMint(bytes32[] calldata _proof) public
+    function genesisClaim(bytes32[] calldata _proof) public
     withValidStage(isPresaleActive)
     withValidProof(genesisRoot, _proof)
-    mintCountNotExceeded(genesisMintsCount)
-    notSoldOut
+    mintCountNotExceeded(genesisClaims, 1, maxGenesisClaims)
+    notSoldOut(1)
     callerIsUser
     nonReentrant {
-        genesisMintsCount[msg.sender]++;
+        genesisClaims[msg.sender]++;
         mint(msg.sender);
 
     }
 
-    function earlyBirdMint(bytes32[] calldata _proof) public payable
+    function ogsMint(bytes32[] calldata _proof, uint _quantity) public payable
     withValidStage(isPresaleActive)
-    withValidProof(earlyBirdRoot, _proof)
-    mintCountNotExceeded(earlyBirdMintsCount)
-    withValidAmount(earlyBirdPrice)
-    notSoldOut
+    withValidProof(ogsRoot, _proof)
+    mintCountNotExceeded(ogMints, _quantity, maxOgsWlMints)
+    withValidAmount(_quantity)
+    notSoldOut(_quantity)
     callerIsUser
     nonReentrant {
-        earlyBirdMintsCount[msg.sender]++;
-        mint(msg.sender);
+        for (uint i = 0; i < _quantity; i++) {
+            ogMints[msg.sender]++;
+            mint(msg.sender);
+        }
+
     }
 
     function whitelistMint(bytes32[] calldata _proof) public payable
     withValidStage(isPresaleActive)
     withValidProof(whitelistRoot, _proof)
-    mintCountNotExceeded(whitelistMintsCount)
-    withValidAmount(regularPrice)
-    notSoldOut
+    mintCountNotExceeded(whitelistMintsCount, 1, maxWlMints)
+    withValidAmount(1)
+    notSoldOut(1)
     callerIsUser
     nonReentrant {
         whitelistMintsCount[msg.sender]++;
         mint(msg.sender);
     }
 
-    function publicMint() public payable
+    function publicMint(uint _quantity) public payable
     withValidStage(isPublicActive)
-    withValidAmount(regularPrice)
-    notSoldOut
+    withValidAmount(_quantity)
+    mintCountNotExceeded(publicMintCount, _quantity, maxPublicMints)
+    notSoldOut(_quantity)
     callerIsUser
     nonReentrant {
-        mint(msg.sender);
+        for (uint i = 0; i < _quantity; i++) {
+            publicMintCount[msg.sender]++;
+            mint(msg.sender);
+        }
+
     }
+
+    function treasuryMint(uint _quantity) public {
+        require(msg.sender == treasuryAddress, "Sender is not treasury");
+        require(treasuryMintCounter + _quantity <= MAX_TREASURY_MINTS, "Minted out");
+
+        for (uint i = 0; i < _quantity; i++) {
+            treasuryMintCounter++;
+            mint(msg.sender);
+        }
+    }
+
 
     function mint(address to) internal {
         uint256 tokenId = _tokenIdsCounter.current();
@@ -86,18 +115,18 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         _safeMint(to, tokenId);
     }
 
-    modifier notSoldOut(){
-        require(totalSupply() < MAX_SUPPLY, "Sold out");
+    modifier notSoldOut(uint _quantity){
+        require(totalSupply() + _quantity <= MAX_EXTERNAL_MINTS, "Sold out");
         _;
     }
 
-    modifier mintCountNotExceeded(mapping(address => uint) storage _mintedCount){
-        require(_mintedCount[msg.sender] < maxMintPerWallet, "Max mints exceeded");
+    modifier mintCountNotExceeded(mapping(address => uint) storage _mintedCount, uint _quantity, uint _maxMints){
+        require(_mintedCount[msg.sender] + _quantity <= _maxMints, "Max mints exceeded");
         _;
     }
 
-    modifier withValidAmount(uint _mintPrice){
-        require(msg.value == _mintPrice, "incorrect ether amount");
+    modifier withValidAmount(uint _quantity){
+        require(msg.value == price * _quantity, "Incorrect ether amount");
         _;
     }
 
@@ -136,16 +165,13 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         isPublicActive = !isPublicActive;
     }
 
-    function setMaxMintsPerWallet(uint256 amount) external onlyOwner {
-        maxMintPerWallet = amount;
-    }
 
     function setGenesisRoot(bytes32 _root) external onlyOwner {
         genesisRoot = _root;
     }
 
-    function setEarlyBirdRoot(bytes32 _root) external onlyOwner {
-        earlyBirdRoot = _root;
+    function setOgRoot(bytes32 _root) external onlyOwner {
+        ogsRoot = _root;
     }
 
     function setWhitelistRoot(bytes32 _root) external onlyOwner {
@@ -161,8 +187,8 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         require(success, "Transfer failed.");
     }
 
-    function verifyMerkle(bytes32[] calldata _proof) external view returns (bool){
-        return MerkleProof.verify(_proof, earlyBirdRoot, keccak256(abi.encodePacked(msg.sender)));
+    function setTreasuryAddress(address _address) external onlyOwner {
+        treasuryAddress = _address;
     }
 }
 
