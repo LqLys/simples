@@ -12,37 +12,48 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdsCounter;
+
     uint public constant MAX_SUPPLY = 1111;
     uint public constant MAX_EXTERNAL_MINTS = 1056;
     uint public constant MAX_TREASURY_MINTS = 55;
 
+    uint public constant maxGenesisClaims = 1;
+    uint public constant maxOgsWlMints = 2;
+    uint public constant maxWlMints = 1;
+    uint public constant maxPublicMints = 2;
+
+    uint public constant price = 0.11 ether;
+
+    address private constant splitAddress = 0x926d94e029E0abEFdF2662efB1c5bE972494e9f1;
+    address public treasuryAddress;
+
     bool public isPresaleActive = false;
     bool public isPublicActive = false;
-
-    uint public maxGenesisClaims = 1;
-    uint public maxOgsWlMints = 2;
-    uint public maxWlMints = 1;
-    uint public maxPublicMints = 2;
-
-
-    uint public price = 0.11 ether;
 
     mapping(address => uint) genesisClaims;
     mapping(address => uint) ogMints;
     mapping(address => uint) whitelistMintsCount;
     mapping(address => uint) publicMintCount;
+
     uint public treasuryMintCounter = 0;
 
-    bytes32 public genesisRoot = 0x96c4abbbb9dd027813f2b8c2c4917b15bb46b3c8d595841148f2de33d0c4d6ae;
-    bytes32 public ogsRoot = 0x630d56621cf1a7e28c5373e27f73148778b52a3050a8196b0f14761c44220ece;
-    bytes32 public whitelistRoot = 0x1f62655901b37227b56bc225f83198ff688bfdaf330551d424ee719d7cc877f1;
-
-    address public treasuryAddress;
+    bytes32 private genesisRoot;
+    bytes32 private ogsRoot;
+    bytes32 private whitelistRoot;
 
     string private _customBaseURI;
 
-    constructor(string memory initialBaseURI) ERC721("SecretStuff", "S2") {
+    constructor(
+        string memory initialBaseURI,
+        bytes32 _genesisRoot,
+        bytes32 _ogsRoot,
+        bytes32 _whitelistRoot
+    ) ERC721("SecretStuff", "S2") {
         setBaseTokenURI(initialBaseURI);
+        genesisRoot = _genesisRoot;
+        ogsRoot = _ogsRoot;
+        whitelistRoot = _whitelistRoot;
+
     }
 
     function genesisClaim(bytes32[] calldata _proof) public
@@ -54,7 +65,6 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     nonReentrant {
         genesisClaims[msg.sender]++;
         mint(msg.sender);
-
     }
 
     function ogsMint(bytes32[] calldata _proof, uint _quantity) public payable
@@ -69,7 +79,6 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
             ogMints[msg.sender]++;
             mint(msg.sender);
         }
-
     }
 
     function whitelistMint(bytes32[] calldata _proof) public payable
@@ -86,8 +95,8 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
 
     function publicMint(uint _quantity) public payable
     withValidStage(isPublicActive)
-    withValidAmount(_quantity)
     mintCountNotExceeded(publicMintCount, _quantity, maxPublicMints)
+    withValidAmount(_quantity)
     notSoldOut(_quantity)
     callerIsUser
     nonReentrant {
@@ -95,23 +104,19 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
             publicMintCount[msg.sender]++;
             mint(msg.sender);
         }
-
     }
 
-    function treasuryMint(uint _quantity) public {
-        require(msg.sender == treasuryAddress, "Sender is not treasury");
+    function treasuryMint(uint _quantity) public onlyOwner {
         require(treasuryMintCounter + _quantity <= MAX_TREASURY_MINTS, "Minted out");
-
         for (uint i = 0; i < _quantity; i++) {
             treasuryMintCounter++;
-            mint(msg.sender);
+            mint(treasuryAddress);
         }
     }
 
-
     function mint(address to) internal {
-        uint256 tokenId = _tokenIdsCounter.current();
         _tokenIdsCounter.increment();
+        uint256 tokenId = _tokenIdsCounter.current();
         _safeMint(to, tokenId);
     }
 
@@ -126,7 +131,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     }
 
     modifier withValidAmount(uint _quantity){
-        require(msg.value == price * _quantity, "Incorrect ether amount");
+        require(msg.value >= price * _quantity, "Not enough ether sent");
         _;
     }
 
@@ -165,7 +170,6 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         isPublicActive = !isPublicActive;
     }
 
-
     function setGenesisRoot(bytes32 _root) external onlyOwner {
         genesisRoot = _root;
     }
@@ -178,13 +182,13 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         whitelistRoot = _root;
     }
 
-    function getBalance() public view returns (uint256){
-        return address(this).balance;
-    }
+    function withdrawFunds() external onlyOwner nonReentrant {
+        uint balance = address(this).balance;
+        uint splitAmount = balance * 58 / 1000;
+        uint teamAmount = balance - splitAmount;
+        require(payable(splitAddress).send(splitAmount), "split transfer failed");
+        require(payable(msg.sender).send(teamAmount), "transfer failed");
 
-    function withdrawMoney() external onlyOwner nonReentrant {
-        (bool success,) = msg.sender.call{value : address(this).balance}("");
-        require(success, "Transfer failed.");
     }
 
     function setTreasuryAddress(address _address) external onlyOwner {
