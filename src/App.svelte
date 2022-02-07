@@ -383,10 +383,7 @@
                             {/if}
                         {/if}
                     </div>
-                    <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>
-                    <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>
-<!--                    <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>-->
-<!--                    <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>-->
+
                     <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"></div>
                 </td>
             </tr>
