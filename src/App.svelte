@@ -3,17 +3,19 @@
     import SecretStuff from "./artifacts/contracts/SecretStuff.sol/SecretStuff.json";
     import {onDestroy, onMount} from "svelte";
 
-    // const API_BASE = 'https://simples-api.herokuapp.com/api/';
-    const API_BASE = 'http://localhost:8080/api/';
+    const API_BASE = 'https://simples-api.herokuapp.com/api/';
+    // const API_BASE = 'http://localhost:8080/api/';
 
-    const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    // const contractAddress = "0xd3d927F2E87EdB36B8490B1D3597641D839eAeCC";
+    // const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+    const contractAddress = "0xf07B6e9a2Dd4E80F3D9C368196d7c16Af849C6Ad";
     let isPresaleMintActive = false;
     let isPublicMintActive = false;
     let currentAccount;
     let currentAddressRole;
     let ogAmountSelected = 2;
     let publicAmountSelected = 2;
+    let amountMinted = 0;
+    let amountMintedInterval;
 
     onMount(async () => {
         if (typeof window.ethereum === "undefined") {
@@ -43,6 +45,7 @@
         window.ethereum.removeListener("chainChanged", handleChainChanged)
         window.ethereum.removeListener("accountsChanged", handleAccountsChanged)
         window.ethereum.removeListener("disconnect", handleDisconnect)
+        clearInterval(amountMintedInterval);
     })
 
     const handleAccountsChanged = async () => {
@@ -213,7 +216,6 @@
             } catch (err) {
                 return false;
             }
-
         }
     }
 
@@ -231,6 +233,19 @@
         }
     }
 
+    async function getAmountMinted() {
+        if (typeof window.ethereum !== "undefined") {
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+                const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
+                amountMinted = await contract.totalSupply();
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    }
+
     const connectWallet = async () => {
         try {
             const accounts = await window.ethereum.request({method: "eth_requestAccounts"});
@@ -238,6 +253,10 @@
             currentAddressRole = await getRole(currentAccount);
             isPresaleMintActive = await isPresaleActive();
             isPublicMintActive = await isPublicActive();
+            getAmountMinted();
+            amountMintedInterval = setInterval(() => {
+                getAmountMinted();
+            }, 10000);
         } catch (err) {
             console.log(err);
         }
@@ -294,7 +313,11 @@
                                 <span class="wallet-container">{currentAccount}</span>
                                 <button class="button-5" on:click={disconnectWallet}>Disconnect</button>
                             </div>
+                            <div class="amount-info-container">
+                                <span>Minted: {amountMinted}/1111</span>
+                            </div>
                             {#if isPresaleMintActive && !isPublicMintActive}
+
                                 {#if currentAddressRole === "gen"}
                                     <div class="amount-info-container">
                                         <span>Free Claim and 2 presale mints allowed.</span>
@@ -336,7 +359,7 @@
                                 {/if}
                             {:else if isPresaleMintActive && isPublicMintActive}
                                 <div class="amount-info-container">
-                                    <span>2 mints allowed.</span>
+                                    <span>Public mint: 2 mints allowed.</span>
                                 </div>
                                 <div>
                                     <button class="button-5" on:click={publicMint}>Mint</button>
@@ -350,7 +373,7 @@
                                     {#if currentAddressRole === "gen"}
                                         <span>Free Claim and 2 presale mints allowed.</span>
                                     {:else if currentAddressRole === "eb"}
-                                        <span>Free Claim and 2 presale mints allowed.</span>
+                                        <span>2 presale mints allowed.</span>
                                     {:else if currentAddressRole === "wl"}
                                         <span>1 presale mint allowed.</span>
                                     {:else}
@@ -360,10 +383,10 @@
                             {/if}
                         {/if}
                     </div>
-                                        <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>
-                                        <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>
-                                        <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>
-                                        <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>
+                    <button class="button-5" on:click={togglePresaleMint}>Toggle Presale Mint</button>
+                    <button class="button-5" on:click={togglePublicMint}>Toggle Public Mint</button>
+<!--                    <button class="button-5" on:click={isPresaleActive}>Get Presale Mint status</button>-->
+<!--                    <button class="button-5" on:click={isPublicActive}>Get Public Mint status</button>-->
                     <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"></div>
                 </td>
             </tr>

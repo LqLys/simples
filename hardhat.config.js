@@ -35,7 +35,8 @@ module.exports = {
     },
     // rinkeby: {
     //   url: "",
-    //   accounts: [``]
+    //   accounts: [``],
+    //   gasPrice: 100000000000
     // }
   }
 };
