@@ -24,7 +24,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
 
     uint public constant price = 0.11 ether;
 
-    address private constant splitAddress = 0x926d94e029E0abEFdF2662efB1c5bE972494e9f1;
+    address private constant splitAddress = 0x18bE35cE8418f08E53cF1c8A0F1Dcfe262868ddf;
     address public treasuryAddress;
 
     bool public isPresaleActive = false;

@@ -15,8 +15,10 @@ async function main() {
 
     // We get the contract to deploy
     const SecretStuff = await hre.ethers.getContractFactory("SecretStuff");
-    const secretStuff = await SecretStuff.deploy('https://kaszojady.herokuapp.com/api/metadata/simples/', '0x96c4abbbb9dd027813f2b8c2c4917b15bb46b3c8d595841148f2de33d0c4d6ae',
-        '0x630d56621cf1a7e28c5373e27f73148778b52a3050a8196b0f14761c44220ece', '0x1f62655901b37227b56bc225f83198ff688bfdaf330551d424ee719d7cc877f1');
+    const secretStuff = await SecretStuff.deploy('https://kaszojady.herokuapp.com/api/metadata/simples/',
+        '0xd61e10f708873e131de88051bec04863244816e391c541728f35c2afa429ddf4',
+        '0x810c35cd24039f797f1a00269b919798eeba36e808ba9450059ba66c328cc316',
+        '0x96df715e388d599f8580c6eef7c9dbedd2457ff31b5d73f1993dfc8b039365ae');
 
     await secretStuff.deployed();
 
