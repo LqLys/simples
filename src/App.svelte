@@ -384,7 +384,7 @@
                         {/if}
                     </div>
 
-                    <div align="center"><img src="bottom.png" alt="img" style="width: 100%;"></div>
+                    <div align="center"><img src="simples_bottom.jpg" alt="img" style="width: 100%;"></div>
                 </td>
             </tr>
             </tbody>
