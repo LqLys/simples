@@ -36,6 +36,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     mapping(address => uint) publicMintCount;
 
     uint public treasuryMintCounter = 0;
+    uint public externalMintCounter = 0;
 
     bytes32 private genesisRoot;
     bytes32 private ogsRoot;
@@ -64,6 +65,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     callerIsUser
     nonReentrant {
         genesisClaims[msg.sender]++;
+        externalMintCounter++;
         mint(msg.sender);
     }
 
@@ -77,6 +79,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     nonReentrant {
         for (uint i = 0; i < _quantity; i++) {
             ogMints[msg.sender]++;
+            externalMintCounter++;
             mint(msg.sender);
         }
     }
@@ -90,6 +93,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     callerIsUser
     nonReentrant {
         whitelistMintsCount[msg.sender]++;
+        externalMintCounter++;
         mint(msg.sender);
     }
 
@@ -102,6 +106,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     nonReentrant {
         for (uint i = 0; i < _quantity; i++) {
             publicMintCount[msg.sender]++;
+            externalMintCounter++;
             mint(msg.sender);
         }
     }
@@ -121,7 +126,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
     }
 
     modifier notSoldOut(uint _quantity){
-        require(totalSupply() + _quantity <= MAX_EXTERNAL_MINTS, "Sold out");
+        require(externalMintCounter + _quantity <= MAX_EXTERNAL_MINTS, "Sold out");
         _;
     }
 
