@@ -33,11 +33,10 @@ module.exports = {
     hardhat: {
       chainId: 1337
     },
-    // rinkeby: {
-    //   url: "",
-    //   accounts: [``],
-    //   gasPrice: 100000000000
-    // }
+    rinkeby: {
+      url: "",
+      accounts: [``],
+    }
   }
 };
 

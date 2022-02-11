@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
+contract TheSimples is ERC721, Ownable, ReentrancyGuard {
     using Counters for Counters.Counter;
 
     Counters.Counter private _tokenIdsCounter;
@@ -49,7 +49,7 @@ contract SecretStuff is ERC721, Ownable, ReentrancyGuard {
         bytes32 _genesisRoot,
         bytes32 _ogsRoot,
         bytes32 _whitelistRoot
-    ) ERC721("SecretStuff", "S2") {
+    ) ERC721("The Simples", "TS") {
         setBaseTokenURI(initialBaseURI);
         genesisRoot = _genesisRoot;
         ogsRoot = _ogsRoot;
