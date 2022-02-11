@@ -297,13 +297,12 @@
                     <div>
                         {#if !currentAccount}
                             <p class="txt-375">Get Simple!</p>
-                            <button class="button-l" on:click={connectWallet}><span
-                                    class="txt-541">Connect Wallet</span></button>
+                            <button class="button-l" on:click={connectWallet}>Connect Wallet</button>
                         {:else}
 
                             <div>
                                 <span class="wallet-container">{currentAccount}</span>
-                                <button class="button-m" on:click={disconnectWallet}><span class="txt-801">Disconnect</span></button>
+                                <button class="button-m" on:click={disconnectWallet}>Disconnect</button>
                             </div>
                             <div class="amount-info-container">
                                 <p class="txt-954">Minted: {amountMinted}/1111</p>
@@ -316,8 +315,8 @@
                                             class="txt-5932">1</span> for free
                                     </p>
                                     <div>
-                                        <button class="button-m" on:click={genesisFreeClaim}><span class="txt-801">Free claim</span></button>
-                                        <button class="button-m" on:click={ogsMint}><span class="txt-801">Mint now!</span></button>
+                                        <button class="button-m" on:click={genesisFreeClaim}>Free claim</button>
+                                        <button class="button-m" on:click={ogsMint}>Mint now!</button>
                                         <select class="mint-now-quantity" bind:value={ogAmountSelected}>
                                             <option value="{1}">1</option>
                                             <option value="{2}">2</option>
@@ -329,7 +328,7 @@
                                         You can mint <span class="txt-5932">2</span> presale Simples
                                     </p>
                                     <div>
-                                        <button class="button-m" on:click={ogsMint}><span class="txt-801">Mint now!</span></button>
+                                        <button class="button-m" on:click={ogsMint}>Mint now!</button>
                                         <select class="amount-selector" bind:value={ogAmountSelected}>
                                             <option value="{1}">1</option>
                                             <option value="{2}">2</option>
@@ -341,7 +340,7 @@
                                         You can mint <span class="txt-5932">1</span> presale Simple
                                     </p>
                                     <div>
-                                        <button class="button-m" on:click={whitelistMint}><span class="txt-801">Mint now!</span></button>
+                                        <button class="button-m" on:click={whitelistMint}>Mint now!</button>
                                     </div>
 
                                 {:else}
@@ -355,7 +354,7 @@
                                     You can mint <span class="txt-5932">1</span> Simples
                                 </p>
                                 <div>
-                                    <button class="button-m" on:click={publicMint}><span class="txt-801">Mint now!</span></button>
+                                    <button class="button-m" on:click={publicMint}>Mint now!</button>
                                     <select class="amount-selector" bind:value={publicAmountSelected}>
                                         <option value="{1}">1</option>
                                         <option value="{2}">2</option>
