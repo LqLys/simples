@@ -5,7 +5,7 @@
 
     const API_BASE = 'https://simples-api.herokuapp.com/api/';
 
-    const contractAddress = "0xd0308a2CB8e786c10685b09eB20ca7c5380D4a47";
+    const contractAddress = "0x243c402D52726ADE5d742Caa23D88d8C62948E9e";
     let isPresaleMintActive = false;
     let isPublicMintActive = false;
     let currentAccount;
@@ -22,12 +22,7 @@
             }, 1000)
 
         } else {
-            try {
-                console.log(isPresaleMintActive)
-            } catch (err) {
-                console.log(err);
-            }
-            setTimeout(() => {
+           setTimeout(() => {
                 if (window.ethereum.networkVersion !== '1') {
                     alert('Change network to mainnet')
                 }
@@ -238,7 +233,6 @@
                 const signer = provider.getSigner();
                 const contract = new ethers.Contract(contractAddress, SecretStuff.abi, signer);
                 amountMinted = await contract.totalSupply();
-                console.log()
             } catch (err) {
                 console.log(err);
             }
@@ -251,7 +245,6 @@
             currentAccount = accounts[0];
             currentAddressRole = await getRole(currentAccount);
             isPresaleMintActive = await isPresaleActive();
-            console.log('presale active: ', isPresaleMintActive)
             isPublicMintActive = await isPublicActive();
             getAmountMinted();
             amountMintedInterval = setInterval(() => {
@@ -278,7 +271,6 @@
         try {
             const response = await fetch(API_BASE + `proof?wallet=${address}&role=${role}`)
             const proofJson = await response.json();
-            console.log("proof: ", proofJson)
             return proofJson.proof;
         } catch (err) {
             console.log(err);
@@ -304,7 +296,7 @@
                 <td style="width: 100%;">
                     <div>
                         {#if !currentAccount}
-                            <p class="txt-375">Start minting</p>
+                            <p class="txt-375">Get Simple!</p>
                             <button class="button-l" on:click={connectWallet}><span
                                     class="txt-541">Connect Wallet</span></button>
                         {:else}
@@ -326,7 +318,7 @@
                                     <div>
                                         <button class="button-m" on:click={genesisFreeClaim}><span class="txt-801">Free claim</span></button>
                                         <button class="button-m" on:click={ogsMint}><span class="txt-801">Mint now!</span></button>
-                                        <select class="amount-selector" bind:value={ogAmountSelected}>
+                                        <select class="mint-now-quantity" bind:value={ogAmountSelected}>
                                             <option value="{1}">1</option>
                                             <option value="{2}">2</option>
                                         </select>
@@ -395,6 +387,7 @@
                     </div>
 
                     <div align="center"><img src="simples_bottom.jpg" alt="img" style="width: 100%;"></div>
+
                 </td>
             </tr>
             </tbody>
@@ -403,8 +396,7 @@
 </main>
 
 <style>
-    /*@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap");*/
-
+    @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap");
     main {
         text-align: center;
         max-width: 240px;
@@ -557,4 +549,8 @@
         color: rgba(35, 23, 21, 0.8);
         word-wrap: break-word;
     }
+    button:hover {
+        cursor: pointer;
+    }
+
 </style>

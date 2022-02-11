@@ -16,9 +16,9 @@ async function main() {
     // We get the contract to deploy
     const TheSimples = await hre.ethers.getContractFactory("TheSimples");
     const theSimples = await TheSimples.deploy('https://simples-api.herokuapp.com/api/metadata/simples/',
-        '0xd61e10f708873e131de88051bec04863244816e391c541728f35c2afa429ddf4',
-        '0x810c35cd24039f797f1a00269b919798eeba36e808ba9450059ba66c328cc316',
-        '0x96df715e388d599f8580c6eef7c9dbedd2457ff31b5d73f1993dfc8b039365ae');
+        '0xd25414f4e1feb4a6d9eb331c5740aeb69aedf09d800c7b4910b8d98d8de13c5d',
+        '0x632c01a1ccdfa4ad62c0e4554fdc2632475178bec6a1273c8503c37575be6be7',
+        '0xdc4b12260b51bb09533c5c8d4bf39aa240b97a672a72fd5ea4c733e63ecb26f2');
 
     await theSimples.deployed();
 

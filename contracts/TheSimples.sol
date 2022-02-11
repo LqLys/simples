@@ -24,8 +24,8 @@ contract TheSimples is ERC721, Ownable, ReentrancyGuard {
 
     uint public constant price = 0.11 ether;
 
-    address private constant splitAddress = 0x18bE35cE8418f08E53cF1c8A0F1Dcfe262868ddf;
-    address public treasuryAddress;
+    address private constant splitAddress = 0x6F957b0f6BeE061AC1aa66248E70f94389Cf9908;
+    address private constant treasuryAddress = 0xe3e4775D8b220f1046B3070Ab5ED09135F0E3F8f;
 
     bool public isPresaleActive = false;
     bool public isPublicActive = false;
@@ -49,7 +49,7 @@ contract TheSimples is ERC721, Ownable, ReentrancyGuard {
         bytes32 _genesisRoot,
         bytes32 _ogsRoot,
         bytes32 _whitelistRoot
-    ) ERC721("The Simples", "TS") {
+    ) ERC721("The Simples 1111", "TS1") {
         setBaseTokenURI(initialBaseURI);
         genesisRoot = _genesisRoot;
         ogsRoot = _ogsRoot;
@@ -196,8 +196,5 @@ contract TheSimples is ERC721, Ownable, ReentrancyGuard {
 
     }
 
-    function setTreasuryAddress(address _address) external onlyOwner {
-        treasuryAddress = _address;
-    }
 }
 
