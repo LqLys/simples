@@ -403,7 +403,7 @@
 </main>
 
 <style>
-    @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap");
+    /*@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap");*/
 
     main {
         text-align: center;
