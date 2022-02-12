@@ -14,6 +14,7 @@
     let publicAmountSelected = 2;
     let amountMinted = 0;
     let amountMintedInterval;
+    let dataLoading = true;
 
     onMount(async () => {
         if (typeof window.ethereum === "undefined") {
@@ -22,7 +23,7 @@
             }, 1000)
 
         } else {
-           setTimeout(() => {
+            setTimeout(() => {
                 if (window.ethereum.networkVersion !== '1') {
                     alert('Change network to mainnet')
                 }
@@ -32,6 +33,11 @@
             window.ethereum.on("accountsChanged", handleAccountsChanged)
             window.ethereum.on("disconnect", handleDisconnect)
         }
+
+        getAmountMinted();
+        amountMintedInterval = setInterval(() => {
+            getAmountMinted();
+        }, 10000);
     })
 
     onDestroy(() => {
@@ -47,6 +53,7 @@
         if (addresses.length === 0) {
             console.log("Please connect to Metamask");
             currentAccount = null;
+            dataLoading = true;
         } else if (addresses[0] !== currentAccount) {
             currentAccount = addresses[0];
             currentAddressRole = await getRole(currentAccount);
@@ -59,6 +66,7 @@
 
     const handleDisconnect = () => {
         currentAccount = null;
+        dataLoading = true;
         window.location.reload();
     }
 
@@ -79,6 +87,7 @@
                     await transaction.wait();
                 } catch (err) {
                     const errMsg = err.data?.message;
+                    console.log(typeof err);
                     if (errMsg?.includes("Max mints exceeded")) {
                         alert("You have already claimed your token")
                     }
@@ -246,10 +255,7 @@
             currentAddressRole = await getRole(currentAccount);
             isPresaleMintActive = await isPresaleActive();
             isPublicMintActive = await isPublicActive();
-            getAmountMinted();
-            amountMintedInterval = setInterval(() => {
-                getAmountMinted();
-            }, 10000);
+            dataLoading = false;
         } catch (err) {
             console.log(err);
         }
@@ -280,276 +286,102 @@
 
     const disconnectWallet = () => {
         currentAccount = null;
+        dataLoading = true;
     };
 
 
 </script>
 
-<main>
-    <div align="center">
-        <img src="top-mint.jpg" style="width: 100%;" alt="img"></div>
-    <div>
-        <table style="width: 80%; border-collapse: collapse; border-style: hidden; margin-left: auto; margin-right: auto;"
-               border="0">
-            <tbody>
-            <tr>
-                <td style="width: 100%;">
-                    <div>
-                        {#if !currentAccount}
-                            <p class="txt-375">Get Simple!</p>
-                            <button class="button-l" on:click={connectWallet}>Connect Wallet</button>
+<main class="content">
+    <img class="content-header" src="header.png" srcset="header.png 1x, header@2x.png 2x" alt="The Simples by Konrad Kirpluk">
+    <div class="content-inside">
+        {#if !currentAccount}
+            <div class="intro">
+                <h1 class="intro-title">Start minting</h1>
+                <button class="intro-button" on:click={connectWallet}>Connect Wallet</button>
+                <div class="available-note">{amountMinted} of 1111 available</div>
+            </div>
+        {:else}
+            <!-- TEMPLATE - MINT -->
+            <div class="wallet">
+                <div class="wallet-number">{currentAccount.substring(0, 6)} <span>&hellip;</span> {currentAccount.substring(currentAccount.length - 4, currentAccount.length)}</div>
+                <button class="wallet-button" on:click={disconnectWallet}>Disconnect</button>
+            </div>
+            <div class="mint">
+                {#if dataLoading}
+                    <h2 class="mint-title">
+                        Loading...
+                    </h2>
+                {:else}
+                    {#if isPresaleMintActive && !isPublicMintActive}
+                        {#if currentAddressRole === "gen"}
+                            <h2 class="mint-title">You can mint <span>2</span> presale Simples</h2>
+                            <div class="mint-now">
+                                <select name="quantity" class="mint-now-quantity" bind:value={ogAmountSelected}>
+                                    <option value="{1}">1</option>
+                                    <option value="{2}">2</option>
+                                </select>
+                                <button class="mint-now-button" on:click={ogsMint}>Mint Now!</button>
+                            </div>
+                            <h2 class="mint-title">and claim <span>1</span> for free</h2>
+                            <button class="mint-free-button" on:click={genesisFreeClaim}>Free Claim</button>
+
+                        {:else if currentAddressRole === "eb"}
+                            <h2 class="mint-title">You can mint <span>2</span> presale Simples</h2>
+                            <div class="mint-now">
+                                <select name="quantity" class="mint-now-quantity" bind:value={ogAmountSelected}>
+                                    <option value="{1}">1</option>
+                                    <option value="{2}">2</option>
+                                </select>
+                                <button class="mint-now-button" on:click={ogsMint}>Mint Now!</button>
+                            </div>
+                        {:else if currentAddressRole === "wl"}
+                            <h2 class="mint-title">You can mint <span>1</span> presale Simple</h2>
+                            <div class="mint-now">
+                                <button class="mint-now-button" on:click={whitelistMint}>Mint Now!</button>
+                            </div>
                         {:else}
-
-                            <div>
-                                <span class="wallet-container">{currentAccount}</span>
-                                <button class="button-m" on:click={disconnectWallet}>Disconnect</button>
-                            </div>
-                            <div class="amount-info-container">
-                                <p class="txt-954">Minted: {amountMinted}/1111</p>
-                            </div>
-                            {#if isPresaleMintActive && !isPublicMintActive}
-
-                                {#if currentAddressRole === "gen"}
-                                    <p class="txt-593">
-                                        You can mint <span class="txt-5932">2</span> presale Simples and claim <span
-                                            class="txt-5932">1</span> for free
-                                    </p>
-                                    <div>
-                                        <button class="button-m" on:click={genesisFreeClaim}>Free claim</button>
-                                        <button class="button-m" on:click={ogsMint}>Mint now!</button>
-                                        <select class="mint-now-quantity" bind:value={ogAmountSelected}>
-                                            <option value="{1}">1</option>
-                                            <option value="{2}">2</option>
-                                        </select>
-                                    </div>
-
-                                {:else if currentAddressRole === "eb"}
-                                    <p class="txt-593">
-                                        You can mint <span class="txt-5932">2</span> presale Simples
-                                    </p>
-                                    <div>
-                                        <button class="button-m" on:click={ogsMint}>Mint now!</button>
-                                        <select class="amount-selector" bind:value={ogAmountSelected}>
-                                            <option value="{1}">1</option>
-                                            <option value="{2}">2</option>
-                                        </select>
-                                    </div>
-
-                                {:else if currentAddressRole === "wl"}
-                                    <p class="txt-593">
-                                        You can mint <span class="txt-5932">1</span> presale Simple
-                                    </p>
-                                    <div>
-                                        <button class="button-m" on:click={whitelistMint}>Mint now!</button>
-                                    </div>
-
-                                {:else}
-                                    <p class="txt-593">
-                                        You are not allowed to mint
-                                    </p>
-
-                                {/if}
-                            {:else if isPresaleMintActive && isPublicMintActive}
-                                <p class="txt-593">
-                                    You can mint <span class="txt-5932">1</span> Simples
-                                </p>
-                                <div>
-                                    <button class="button-m" on:click={publicMint}>Mint now!</button>
-                                    <select class="amount-selector" bind:value={publicAmountSelected}>
-                                        <option value="{1}">1</option>
-                                        <option value="{2}">2</option>
-                                    </select>
-                                </div>
-                            {:else}
-                                <div class="amount-info-container">
-                                    {#if currentAddressRole === "gen"}
-                                        <p class="txt-593">
-                                            You can mint <span class="txt-5932">2</span> presale Simples and claim <span
-                                                class="txt-5932">1</span> for free
-                                        </p>
-                                    {:else if currentAddressRole === "eb"}
-                                        <p class="txt-593">
-                                            You can mint <span class="txt-5932">2</span> presale Simples
-                                        </p>
-                                    {:else if currentAddressRole === "wl"}
-                                        <p class="txt-593">
-                                            You can mint <span class="txt-5932">1</span> presale Simple
-                                        </p>
-                                    {:else}
-                                        <p class="txt-593">
-                                            You are not allowed to mint
-                                        </p>
-                                    {/if}
-                                </div>
-                            {/if}
+                            <h2 class="mint-title">You are not allowed to mint</h2> 
                         {/if}
-                    </div>
-
-                    <div align="center"><img src="simples_bottom.jpg" alt="img" style="width: 100%;"></div>
-
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    {:else if isPresaleMintActive && isPublicMintActive}
+                        <h2 class="mint-title">You can mint <span>1</span> Simples</h2>
+                        <div class="mint-now">
+                            <select name="quantity" class="mint-now-quantity" bind:value={publicAmountSelected}>
+                                <option value="{1}">1</option>
+                                <option value="{2}">2</option>
+                            </select>
+                            <button class="mint-now-button" on:click={publicMint}>Mint Now!</button>
+                        </div>
+                    {:else}
+                        {#if currentAddressRole === "gen"}
+                            <h2 class="mint-title">
+                                You can mint <span>2</span> presale Simples and claim <span>1</span> for free
+                            </h2>
+                        {:else if currentAddressRole === "eb"}
+                            <h2 class="mint-title">
+                                You can mint <span>2</span> presale Simples
+                            </h2>
+                        {:else if currentAddressRole === "wl"}
+                            <h2 class="mint-title">
+                                You can mint <span>1</span> presale Simple
+                            </h2>
+                        {:else}
+                            <h2 class="mint-title">
+                                You are not allowed to mint
+                            </h2>
+                        {/if}
+                    {/if}
+                {/if}
+                <div class="available-note">{amountMinted} of 1111 available</div>
+            </div>
+            <!-- END TEMPLATE - MINT -->
+        {/if}
     </div>
 </main>
+<footer class="footer">
+    Follow The Simples on <a href="https://twitter.com/thesimplesart" target="_blank" rel="noopener noreferrer">Twitter</a> or <a href="https://discord.com/invite/RCn2TdchEP" target="_blank" rel="noopener noreferrer">Discord</a><br />
+    <a href="https://etherscan.io/address/0x243c402d52726ade5d742caa23d88d8c62948e9e" target="_blank" rel="noopener noreferrer">Verified Smart Contract</a>
+</footer>
 
 <style>
-    @import url("https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap");
-    main {
-        text-align: center;
-        max-width: 240px;
-        margin: 0 auto;
-    }
-
-    h1 {
-        color: #ff3e00;
-        text-transform: uppercase;
-        font-size: 4em;
-        font-weight: 100;
-    }
-
-    @media (min-width: 640px) {
-        main {
-            max-width: none;
-        }
-    }
-
-    .amount-selector {
-        width: 50px;
-        height: 35px;
-        font-size: larger;
-        text-align: center;
-    }
-
-    .button-5 {
-        align-items: center;
-        background-clip: padding-box;
-        background-color: #F47C06;
-        border: 1px solid transparent;
-        border-radius: .25rem;
-        box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
-        box-sizing: border-box;
-        color: #fff;
-        cursor: pointer;
-        display: inline-flex;
-        font-family: system-ui, -apple-system, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
-        font-size: 16px;
-        font-weight: 600;
-        justify-content: center;
-        line-height: 1.25;
-        margin: 0;
-        min-height: 3rem;
-        padding: calc(.875rem - 1px) calc(1.5rem - 1px);
-        position: relative;
-        text-decoration: none;
-        transition: all 250ms;
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: manipulation;
-        vertical-align: baseline;
-        width: auto;
-    }
-
-    .button-5:hover,
-    .button-5:focus {
-        background-color: #F47C06;
-        box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
-    }
-
-    .button-5:hover {
-        transform: translateY(-1px);
-    }
-
-    .button-5:active {
-        background-color: #F47C06;
-        box-shadow: rgba(0, 0, 0, .06) 0 2px 4px;
-        transform: translateY(0);
-    }
-
-    .wallet-container {
-        font-family: sans-serif;
-        border: 3px solid #F47C06;
-        border-radius: 10px;
-        padding: 12px;
-        font-family: 'Roboto';
-        font-weight: 900
-    }
-
-    .amount-info-container {
-        font-family: 'Roboto';
-        margin-top: 8px;
-        margin-bottom: 8px;
-        font-weight: 900;
-    }
-
-    .button-l {
-        padding: 15px 39px;
-        margin-bottom: 16px;
-        box-sizing: border-box;
-        border-radius: 80px;
-        background-color: rgba(255, 126, 0, 1);
-        width: fit-content;
-    }
-
-    .txt-541 {
-        font-size: 24px;
-        font-family: Nunito, sans-serif;
-        font-weight: 800;
-        letter-spacing: 0.48px;
-        color: rgba(255, 255, 255, 1);
-        word-wrap: break-word;
-    }
-
-    .txt-375 {
-        font-size: 32px;
-        font-family: Nunito, sans-serif;
-        font-weight: 800;
-        line-height: 125%;
-        color: rgba(35, 23, 21, 1);
-        text-align: center;
-        word-wrap: break-word;
-    }
-
-    .txt-593 {
-        font-size: 32px;
-        font-family: Nunito, sans-serif;
-        font-weight: 800;
-        line-height: 125%;
-        color: rgba(35, 23, 21, 1);
-        text-align: center;
-        word-wrap: break-word;
-        margin-bottom: 20px;
-    }
-
-    .txt-5932 {
-        color: rgba(255, 126, 0, 1);
-    }
-
-    .txt-801 {
-        font-size: 16px;
-        font-family: Nunito, sans-serif;
-        font-weight: 800;
-        letter-spacing: 0.32px;
-        color: rgba(255, 255, 255, 1);
-        word-wrap: break-word;
-    }
-    .button-m {
-        padding: 11px 31px;
-        box-sizing: border-box;
-        border-radius: 80px;
-        background-color: rgba(255, 126, 0, 1);
-        height: 100%;
-    }
-    .txt-954 {
-        font-size: 16px;
-        font-family: Nunito, sans-serif;
-        font-weight: 600;
-        color: rgba(35, 23, 21, 0.8);
-        word-wrap: break-word;
-    }
-    button:hover {
-        cursor: pointer;
-    }
-
 </style>

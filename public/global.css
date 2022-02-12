@@ -1,14 +1,78 @@
-body {
-    margin-left: 0px;
-    margin-top: 0px;
-    font-family: sans-serif;
+/* ---- VARIABLES ---- */
+:root {
+    --color-white: #fff;
+    --color-black: #000;
+
+    --color-dark-1000: rgba(35, 23, 21, 1); /* #231715; */
+    --color-dark-800: rgba(35, 23, 21, 0.8);
+    --color-dark-300: rgba(35, 23, 21, 0.3);
+
+    --color-orange-500: #FF7E00;
+    --color-orange-800: #FF5C00;
 }
 
-a:link {
-    color: black;
-    background-color: transparent;
-    text-decoration: none;
+/* ---- RESET ---- */
+* { margin: 0; padding: 0; }
+*, *:before, *:after { border: 0; outline: none; }
+ol, ul { list-style: none; }
+a, a:focus, a:link, a:visited, a:hover { outline: none; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+a:focus { color: inherit; }
+img, picture, video, canvas, svg { display: block; max-width: 100%; }
+body, input, textarea, button, select { -webkit-font-smoothing: antialiased; -webkit-text-size-adjust: 100%; -moz-osx-font-smoothing: grayscale; outline: none; }
+p, h1, h2, h3, h4, h5, h6 { font-weight: normal; overflow-wrap: break-word; }
+input, textarea, select, button { font: inherit; }
+button, input[type="submit"], label[for] { cursor: pointer; }
+button::-moz-focus-inner, input::-moz-focus-inner { padding: 0; border: 0; }
+table { border-collapse: collapse; border-spacing: 0; }
+button * { pointer-events: none; }
+.pointer-events-disable * { pointer-events: none; }
+
+body, html { width: 100%; height: 100%; }
+
+/* 
+fonts:
+- 400 - Regular
+- 600 - Semi Bold
+- 700 - Bold
+- 800 - Extra Bold
+*/
+
+body { font-size: 16px; line-height: 1; font-family: 'Nunito', sans-serif; background: var(--color-dark-1000); color: var(--color-white); display: flex; flex-flow: column nowrap; justify-content: center; align-items: center; font-weight: 600; }
+
+.footer { padding: 24px; text-align: center; font-size: 16px; line-height: 22px; font-weight: 600; color: var(--color-white); }
+.footer a { color: var(--color-white); font-weight: 800; transition: color 0.4s ease; }
+.footer a:hover { color: var(--color-orange-500); }
+
+.content { margin: 16px 16px 0; width: 680px; background: var(--color-white); color: var(--color-dark-1000); border-radius: 20px; overflow: hidden; }
+.content-header { width: 100%; display: block; }
+.content-inside { padding: 32px; }
+
+.available-note { padding-top: 20px; font-size: 16px; line-height: 22px; color: var(--color-dark-800); text-align: center; }
+
+.intro { padding: 32px 0; display: flex; flex-flow: column nowrap; justify-content: flex-start; align-items: center; }
+.intro-title { padding-bottom: 20px; font-weight: 800; font-size: 32px; line-height: 40px; }
+.intro-button { display: inline-block; padding: 0 40px; height: 64px; border-radius: 32px; box-sizing: border-box; line-height: content-start-button; margin: 0; border: 0; background: var(--color-orange-500); color: var(--color-white); font-weight: 800; font-size: 24px; letter-spacing: 0.02em; text-align: center; transition: background-color 0.4s ease; }
+.intro-button:hover { background: var(--color-orange-800); }
+
+.wallet { display: flex; flex-flow: row nowrap; justify-content: center; align-items: center; }
+.wallet-number { display: flex; flex-flow: row nowrap; justify-content: center; align-items: center; font-size: 16px; line-height: 22px; letter-spacing: 0.02em; margin-right: 12px; }
+.wallet-number span { margin: 0 4px; color: var(--color-dark-300); }
+.wallet-button { border: 2px solid var(--color-dark-300); padding: 0 18px; height: 40px; line-height: 36px; box-sizing: border-box; margin: 0; background: transparent; border-radius: 20px; font-weight: 800; font-size: 14px; letter-spacing: 0.02em; color: var(--color-dark-1000); transition: color 0.4s ease;transition: color 0.4s ease; }
+.wallet-button:hover { color: var(--color-orange-500); }
+
+.mint { padding-top: 20px; display: flex; flex-flow: column nowrap; justify-content: flex-start; align-items: center; }
+.mint-title { padding-top: 20px; font-weight: 800; font-size: 32px; line-height: 40px; text-align: center; }
+.mint-title span { color: var(--color-orange-500); }
+.mint-free { padding-top: 32px; text-align: center; }
+.mint-free-button { margin: 20px 0 0 0; padding: 0 32px; border-radius: 24px; height: 48px; line-height: 48px; text-align: center; background: var(--color-dark-1000); color: var(--color-white); font-weight: 800; font-size: 16px; letter-spacing: 0.02em; transition: background-color 0.4s ease; }
+.mint-free-button:hover { background-color: var(--color-orange-800); }
+.mint-now { margin: 20px 0 0 0; display: flex; flex-flow: row nowrap; justify-content: center; align-items: center; }
+.mint-now-quantity { -webkit-appearance: none; -moz-appearance: none; appearance: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 16px; line-height: 22px; letter-spacing: 0.02em; color: var(--color-dark-1000); height: 48px; border: 2px solid var(--color-dark-300); background: var(--color-white) url('arrow.svg') no-repeat right 17px center; background-size: 11px 8px; border-radius: 24px; box-sizing: border-box; padding: 0 45px 0 24px; }
+.mint-now-button { margin: 0 0 0 12px; padding: 0 32px; border-radius: 24px; height: 48px; line-height: 48px; text-align: center; background: var(--color-orange-500); color: var(--color-white); font-weight: 800; font-size: 16px; letter-spacing: 0.02em; transition: background-color 0.4s ease; }
+.mint-now-button:hover { background-color: var(--color-orange-800); } 
+@media only screen and (max-width: 767px) {
+    .content { width: auto; }
 }
-
-
-/* CSS */
+@media only screen and (max-width: 374px) {
+    .intro-button { padding: 0 20px; }
+}
