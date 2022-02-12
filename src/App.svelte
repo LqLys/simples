@@ -33,11 +33,6 @@
             window.ethereum.on("accountsChanged", handleAccountsChanged)
             window.ethereum.on("disconnect", handleDisconnect)
         }
-
-        getAmountMinted();
-        amountMintedInterval = setInterval(() => {
-            getAmountMinted();
-        }, 10000);
     })
 
     onDestroy(() => {
@@ -256,6 +251,10 @@
             isPresaleMintActive = await isPresaleActive();
             isPublicMintActive = await isPublicActive();
             dataLoading = false;
+            getAmountMinted();
+            amountMintedInterval = setInterval(() => {
+                getAmountMinted();
+            }, 10000);
         } catch (err) {
             console.log(err);
         }
@@ -299,7 +298,6 @@
             <div class="intro">
                 <h1 class="intro-title">Start minting</h1>
                 <button class="intro-button" on:click={connectWallet}>Connect Wallet</button>
-                <div class="available-note">{amountMinted} of 1111 available</div>
             </div>
         {:else}
             <!-- TEMPLATE - MINT -->
