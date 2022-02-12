@@ -342,7 +342,7 @@
                             <h2 class="mint-title">You are not allowed to mint</h2> 
                         {/if}
                     {:else if isPresaleMintActive && isPublicMintActive}
-                        <h2 class="mint-title">You can mint <span>1</span> Simples</h2>
+                        <h2 class="mint-title">You can mint <span>2</span> Simples</h2>
                         <div class="mint-now">
                             <select name="quantity" class="mint-now-quantity" bind:value={publicAmountSelected}>
                                 <option value="{1}">1</option>
@@ -370,7 +370,7 @@
                         {/if}
                     {/if}
                 {/if}
-                <div class="available-note">{amountMinted} of 1111 available</div>
+                <div class="available-note">{1111 - amountMinted} of 1111 available</div>
             </div>
             <!-- END TEMPLATE - MINT -->
         {/if}
