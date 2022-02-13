@@ -175,8 +175,6 @@
                 }
                 console.log(err?.data?.message);
             }
-        } else {
-            alert("This wallet address is not eligible for presale")
         }
 
     }
@@ -251,7 +249,7 @@
             isPresaleMintActive = await isPresaleActive();
             isPublicMintActive = await isPublicActive();
             dataLoading = false;
-            getAmountMinted();
+            await getAmountMinted();
             amountMintedInterval = setInterval(() => {
                 getAmountMinted();
             }, 10000);
@@ -348,7 +346,7 @@
                                 <option value="{1}">1</option>
                                 <option value="{2}">2</option>
                             </select>
-                            <button class="mint-now-button" on:click={publicMint}>Mint Now!</button>
+                            <button class="mint-now-button" on:click="{publicMint}">Mint Now!</button>
                         </div>
                     {:else}
                         {#if currentAddressRole === "gen"}
